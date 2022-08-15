@@ -25,8 +25,13 @@ def save_model(model, run_name, epoch, cloud_store=False, metrics_required=False
         model_to_bucket(parent, child, path)
 
 
-def load_model():
-    pass
+def load_model(model, ckpt_path):
+    path, name = tuple(ckpt_path.split("/"))
+    if os.path.exists(path):
+        model.load_state_dict(torch.load(ckpt_path))
+    else:
+        raise NameError(f"{ckpt_path} does not exist!")
+
 
 def get_transforms():
     """Reference: https://pytorch.org/vision/0.9/transforms.html"""
