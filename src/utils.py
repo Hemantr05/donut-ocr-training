@@ -29,6 +29,8 @@ def load_model(model, ckpt_path):
     path, name = tuple(ckpt_path.split("/"))
     if os.path.exists(path):
         model.load_state_dict(torch.load(ckpt_path))
+        model.eval()
+        return model
     else:
         raise NameError(f"{ckpt_path} does not exist!")
 
