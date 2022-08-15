@@ -1,18 +1,26 @@
 import os
 import torch
 import numpy as np
+import multiprocessing as mp
 from PIL import Image
+
 from torch.utils.data import Dataset, DataLoader
 from transformers import DonutProcessor
-
-from utils import train_test_split
 
 processor = DonutProcessor.from_pretrained('naver-clova-ix/donut-base-finetuned-cord-v2')
 
 
-def loader(data, batch_size=16, shuffle=False, num_workers=0):
-    loader = DataLoader(data, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
-    return loader
+def loader(trainset, testset, batch_size, shuffle=False, num_workers=0):
+    if batch_size:
+        if batch_size % mp.cpu_count() != 0:
+            raise ValueError(f"Batch size {batch_size} must "
+                            f"be divisible by device number {mp.cpu_count()}")
+    train_loader = DataLoader(trainset, batch_size=batch_size, \
+                                shuffle=shuffle, num_workers=num_workers)
+    test_loader = DataLoader(testset, batch_size=1, \
+                                shuffle=shuffle, num_workers=num_workers)
+
+    return train_loader, test_loader
 
 class DonutDataset(Dataset):
     def __init__(self, image_path, annotation_path, transforms=None):
@@ -35,3 +43,7 @@ class DonutDataset(Dataset):
         if self.transforms:
             sample = self.transforms(sample)
         return sample
+
+    def split(self, test_size=0.2):
+        """Split dataset into train and test"""
+        pass
